@@ -1,4 +1,3 @@
-import tkinter as tk
-import tkinter.messagebox as messagebox
-import time
-import pyautogui
+import tkinter as tk  # noqa
+import tkinter.messagebox as messagebox  # noqa
+import time  # noqa
