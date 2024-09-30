@@ -1,7 +1,7 @@
 *.spec
 build
 dist
-
+ini_process.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
