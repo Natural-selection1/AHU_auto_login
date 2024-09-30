@@ -35,6 +35,10 @@ class funcDocker(object):
                 executable_path=self.chromium_path,
             )
             page = browser.new_page()
+
+            # !: 以下网址貌似独属于有线网的
+            # !: 无线网络似乎要优先访问 http://172.26.0.1/
+            # !: 但最后还是要跳转到 http://172.16.253.3/
             page.goto("http://172.16.253.3/")
 
             # 定位元素并填写
