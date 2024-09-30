@@ -11,7 +11,7 @@ class funcDocker(object):
         self.account, self.password = self.get_info()
         self.chromium_path = self.get_chromium_path()
 
-    # 从配置文件中获取账号和密码
+    # 从login_config.ini中读取并返回账号和密码
     def get_info(self):
         config = configparser.ConfigParser()
         config.read("./login_config.ini")
@@ -19,11 +19,12 @@ class funcDocker(object):
         password = config.get("info", "password")
         return account, password
 
-    # 获取chromium浏览器的执行路径
+    # 获取chromium浏览器的执行路径并返回
     def get_chromium_path(self):
         if getattr(sys, "frozen", False):
             chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
         else:
+            # !: 这里的路径可能需要根据自己电脑的实际情况进行修改
             chromium_path = r"C:\Users\29267\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
         return chromium_path
 
@@ -31,7 +32,7 @@ class funcDocker(object):
     def run_auto_login(self):
         with sync_api.sync_playwright() as p:
             browser = p.chromium.launch(
-                headless=True,  # 若要调试，请将headless=False
+                headless=True,  # *: 若要调试，请将headless=False
                 executable_path=self.chromium_path,
             )
             page = browser.new_page()

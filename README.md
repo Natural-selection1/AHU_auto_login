@@ -55,3 +55,13 @@ password = 000000
 - [ ] 提供远程更新服务
 - [ ] 提供异常情况处理
 - [ ] 提供登录后自动打开ini中指定的网页或路径下的程序
+
+
+## 如果你想本地构建的话
+1. pip install playwright
+2. playwright install chromium (安装成功后会显示安装路径, 请记住它)
+3. 可以愉快的运行了
+4. 打包指令(请找到你自己的chrome-win路径以替换以下指令中的path_to_chrome-win)
+```shell
+pyinstaller --onefile --noconsole --add-data "path_to_chrome-win\chrome-win;chrome-win" --name=校园网自动登录 .\auto_login.py
+```
