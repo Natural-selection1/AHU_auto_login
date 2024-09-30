@@ -1,35 +1,47 @@
-from playwright.sync_api import sync_playwright
+import os
+import sys
+
+import configparser  # noqa
+from playwright import sync_api
 
 
-def run_playwright():
-    with sync_playwright() as p:
-        # 启用无头浏览器
-        browser = p.chromium.launch(headless=True)  # 启用无头Chrome浏览器
-        page = browser.new_page()
+class funcDocker(object):
+    def __init__(self, account, password):
+        self.account = account
+        self.password = password
 
-        # 打开登录页面
-        page.goto("http://172.16.253.3/")
+    def get_chromium_path(self):
+        # 检查是否在打包后的环境中运行
+        if getattr(sys, "frozen", False):
+            # 如果是，则使用 _MEIPASS 中的路径和'bin'文件夹的相对路径
+            chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
+        else:
+            # 如果不是，则使用原始的硬编码路径
+            chromium_path = r"C:\Users\29267\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
+        return chromium_path
 
-        # 找到用户名和密码输入框并填写
-        page.fill(
-            'input[class="edit_lobo_cell"][name="DDDDD"]', "Y12314070@cmccyx"
-        )  # 根据实际情况修改选择器
-        page.fill(
-            'input[class="edit_lobo_cell"][name="upass"]', "023076"
-        )  # 根据实际情况修改选择器
+    def run_playwright(self):
+        with sync_api.sync_playwright() as p:
+            chromium_path = self.get_chromium_path()
 
-        # 找到并点击提交按钮
-        page.click('input[value="登录"]')  # 根据实际情况修改选择器
+            browser = p.chromium.launch(headless=True, executable_path=chromium_path)
+            page = browser.new_page()
+            page.goto("http://172.16.253.3/")
 
-        # 等待一段时间，以确保请求完成
-        page.wait_for_timeout(1000)  # 等待 1 秒
+            page.fill('input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}")
+            page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
+            page.click('input[value="登录"]')
 
-        # 获取页面响应
-        print(page.content())  # 输出返回的HTML内容
+            # 等待以确保请求完成
+            page.wait_for_timeout(1000)
 
-        # 关闭浏览器
-        browser.close()
+            browser.close()
 
 
 if __name__ == "__main__":
-    run_playwright()
+    # config = configparser.ConfigParser()
+    # config.read("AHU_auto_login_config.ini")
+    # account = config.get("account", "account")
+    # password = config.get("account", "password")
+
+    func_docker = funcDocker("your_account", "your_password")
