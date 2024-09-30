@@ -1,4 +1,6 @@
 *.spec
+*.gitignore
+*.ini
 build
 dist
 ini_process.py

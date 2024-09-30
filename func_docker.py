@@ -1,34 +1,38 @@
 import os
 import sys
 
-import configparser
-from playwright import sync_api
+import configparser  # 用于读取ini文件
+from playwright import sync_api  # 用于自动化操作浏览器
 
 
 class funcDocker(object):
     def __init__(self):
+        # 初始化账号和密码，以及chromium的路径
         self.account, self.password = self.get_info()
         self.chromium_path = self.get_chromium_path()
 
+    # 从配置文件中获取账号和密码
     def get_info(self):
         config = configparser.ConfigParser()
-        config.read("login_config.ini")
+        config.read("./login_config.ini")
         account = config.get("info", "account")
         password = config.get("info", "password")
         return account, password
 
+    # 获取chromium浏览器的执行路径
     def get_chromium_path(self):
-        # 检查是否在打包后的环境中运行
         if getattr(sys, "frozen", False):
             chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
         else:
             chromium_path = r"C:\Users\29267\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
         return chromium_path
 
+    # 执行自动登录的主要逻辑
     def run_auto_login(self):
         with sync_api.sync_playwright() as p:
             browser = p.chromium.launch(
-                headless=True, executable_path=self.chromium_path
+                headless=True,  # 若要调试，请将headless=False
+                executable_path=self.chromium_path,
             )
             page = browser.new_page()
             page.goto("http://172.16.253.3/")
