@@ -6,34 +6,6 @@ import configparser  # 用于读取ini文件
 from playwright import sync_api  # 用于自动化操作浏览器
 
 
-# 判断是否为wifi链接
-def is_connected_via_wifi(self):
-    try:
-        # 执行 netsh wlan show interfaces 命令
-        output = subprocess.check_output(
-            "netsh wlan show interfaces", shell=True, text=True
-        )
-        # 检查是否有无线连接
-        if "状态" or "State" in output and "已连接" or "connected" in output:
-            return True
-        else:
-            return False
-    except subprocess.CalledProcessError:
-        return False
-
-
-# 获取网关地址
-def get_default_gateway():
-    result = subprocess.run(["ipconfig"], capture_output=True, text=True)
-
-    for line in result.stdout.splitlines():
-        if "默认网关" in line or "Default Gateway" in line:
-            gateway = line.split()[-1]
-            return gateway
-
-    return None
-
-
 class funcDocker(object):
     def __init__(self):
         # 初始化账号和密码，以及chromium的路径
@@ -57,6 +29,32 @@ class funcDocker(object):
             chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
         return chromium_path
 
+    # 判断是否为wifi链接
+    def is_connected_via_wifi(self):
+        try:
+            # 执行 netsh wlan show interfaces 命令
+            output = subprocess.check_output(
+                "netsh wlan show interfaces", shell=True, text=True
+            )
+            # 检查是否有无线连接
+            if "状态" or "State" in output and "已连接" or "connected" in output:
+                return True
+            else:
+                return False
+        except subprocess.CalledProcessError:
+            return False
+
+    # 获取网关地址
+    def get_default_gateway(self):
+        result = subprocess.run(["ipconfig"], capture_output=True, text=True)
+
+        for line in result.stdout.splitlines():
+            if "默认网关" in line or "Default Gateway" in line:
+                gateway = line.split()[-1]
+                return gateway
+
+        return None
+
     # 执行自动登录的主要逻辑
     def run_auto_login(self):
         with sync_api.sync_playwright() as p:
@@ -68,8 +66,8 @@ class funcDocker(object):
 
             # !: 无线网络似乎要优先访问 http://172.26.0.1/
             # !: 但无线网和有线网最后还是要跳转到 http://172.16.253.3/
-            if is_connected_via_wifi(self):
-                url = "http://" + str(get_default_gateway()) + "/"
+            if self.is_connected_via_wifi():
+                url = "http://" + str(self.get_default_gateway()) + "/"
                 page.goto(url)
                 page.wait_for_timeout(1000)
             else:
