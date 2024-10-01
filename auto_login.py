@@ -13,7 +13,7 @@ class funcDocker(object):
         self.chromium_path = self.get_chromium_path()
 
     # 从login_config.ini中读取并返回账号和密码
-    def get_info(self):
+    def get_info(self) -> tuple:
         config = configparser.ConfigParser()
         config.read("./login_config.ini")
         account = config.get("info", "account")
@@ -21,7 +21,7 @@ class funcDocker(object):
         return account, password
 
     # 获取chromium浏览器的执行路径并返回
-    def get_chromium_path(self):
+    def get_chromium_path(self) -> str:
         if getattr(sys, "frozen", False):
             chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
         else:
@@ -30,7 +30,7 @@ class funcDocker(object):
         return chromium_path
 
     # 判断是否为wifi链接
-    def is_connected_via_wifi(self):
+    def is_connected_via_wifi(self) -> bool:
         try:
             # 执行 netsh wlan show interfaces 命令
             output = subprocess.check_output(
@@ -45,7 +45,7 @@ class funcDocker(object):
             return False
 
     # 获取网关地址
-    def get_default_gateway(self):
+    def get_default_gateway(self) -> str:
         result = subprocess.run(["ipconfig"], capture_output=True, text=True)
 
         for line in result.stdout.splitlines():
