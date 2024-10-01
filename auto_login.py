@@ -5,6 +5,9 @@ import configparser  # 用于读取ini文件
 from playwright import sync_api  # 用于自动化操作浏览器
 import re
 
+def get_current_username():
+    return os.getlogin()
+
 # 判断是否为wifi链接
 def is_connected_via_wifi(self):
     try:
@@ -52,7 +55,7 @@ class funcDocker(object):
         else:
             # !: 这里的路径可能需要根据自己电脑的实际情况进行修改
             username = os.environ['USERNAME']
-            chromium_path = r"C:\Users\Teresa\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
+            chromium_path = r"C:\\Users\\"+str(get_current_username())+"\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
         return chromium_path
 
     # 执行自动登录的主要逻辑
