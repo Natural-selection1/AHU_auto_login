@@ -19,19 +19,16 @@ def is_connected_via_wifi(self):
         return False
 
 # 获取网关地址
-def get_gateway_address():
-    try:
-        output = subprocess.check_output("ipconfig", shell=True, text=True)
+def get_default_gateway():
+    result = subprocess.run(['ipconfig'], capture_output=True, text=True)
+    
+    for line in result.stdout.splitlines():
+        if "默认网关" in line or "Default Gateway" in line:
 
-        gateway = re.search(r"默认网关\s*:\s*([0-9.]+)", output)
-
-        if gateway:
-            return gateway.group(1)
-        else:
-            return ""
-
-    except subprocess.CalledProcessError as e:
-        return ""
+            gateway = line.split()[-1]
+            return gateway
+    
+    return None
 
 
 class funcDocker(object):
@@ -69,8 +66,10 @@ class funcDocker(object):
 
             # !: 无线网络似乎要优先访问 http://172.26.0.1/
             # !: 但无线网和有线网最后还是要跳转到 http://172.16.253.3/
-            if(is_connected_via_wifi() == True):
-                page.goto(get_gateway_address())
+            if(is_connected_via_wifi(self) == True):
+                url = "http://" + str(get_default_gateway()) + "/"
+                page.goto(url)
+                page.wait_for_timeout(1000)
             else:
                 page.goto("http://172.16.253.3/")
 
