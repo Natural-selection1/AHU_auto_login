@@ -59,7 +59,6 @@ class funcDocker(object):
             output = output.decode("gbk").split("\r\n\r\n")
         # 取第四段输出，即有线网卡的输出
         output_for_broadband = output[3]
-
         # 通过是否存在租约时间来判断是否有网线介入
         current_year = str(datetime.datetime.now().year)
 
@@ -82,15 +81,33 @@ class funcDocker(object):
             #     page.goto(url)
             #     page.wait_for_timeout(1000)
             # else:
-            page.goto("http://172.21.0.1/")
+            #     page.goto("http://172.21.0.1/")
 
             # TODO: 优先检测是否有线连接，若有则填写全部的账号密码(包括后缀)
-            # TODO: 若无线连接，则只填写学号和密码
+            if self.is_broadband_connected():
+                page.goto("http://172.16.253.3/")
+                # 定位元素并填写
+                page.fill(
+                    'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
+                )
+                page.fill(
+                    'input[class="edit_lobo_cell"][name="upass"]', f"{self.password}"
+                )
+                page.click('input[value="登录"]')
 
-            # 定位元素并填写
-            page.fill('input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}")
-            page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
-            page.click('input[value="登录"]')
+            # TODO: 若无线连接，则只填写学号和密码
+            if self.is_ahu_portal_connected():
+                page.goto("http://172.26.0.1/")
+
+                # 定位元素并填写
+                page.fill(
+                    'input[class="edit_lobo_cell"][name="DDDDD"]',
+                    f"{self.account.split('@')[0] if "@" in self.account else self.account }",
+                )
+                page.fill(
+                    'input[class="edit_lobo_cell"][name="upass"]', f"{self.password}"
+                )
+                page.click('input[value="登录"]')
 
             # 等待以确保请求完成
             page.wait_for_timeout(1000)
