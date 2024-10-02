@@ -5,7 +5,7 @@ import subprocess
 
 import configparser  # 用于读取ini文件
 from playwright import sync_api  # 用于自动化操作浏览器
-from plyer import notification
+from plyer import notification  # 用于发送windows通知
 
 
 class funcDocker(object):
@@ -16,7 +16,9 @@ class funcDocker(object):
         self.flag = self.select_network_mode()
 
     @staticmethod
+    # 检查是否已经存在可用的网络连接
     def is_network_connected() -> bool:
+        # 流式输出ping命令的结果，以便及时处理
         process = subprocess.Popen(
             "ping 103.235.47.188",
             shell=True,
@@ -138,10 +140,11 @@ if __name__ == "__main__":
     func_docker.run_auto_login()
 
 
+# *: 以下是通知模版
 # notification.notify(
 #     title="提醒标题",
 #     message="这是提醒的内容",
-#     app_icon="D:/00__Chrome_Download/13378567.png",
+#     app_icon="path/to/icon.ico",
 #     timeout=5,
 # )
 
