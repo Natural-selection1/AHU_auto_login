@@ -15,23 +15,6 @@ class funcDocker(object):
         self.chromium_path = self.get_chromium_path()
         self.flag = self.select_network_mode()
 
-    # 从login_config.ini中读取并返回账号和密码
-    def get_info(self) -> tuple:
-        config = configparser.ConfigParser()
-        config.read("./login_config.ini")
-        account = config.get("info", "account")
-        password = config.get("info", "password")
-        return account, password
-
-    # 获取chromium浏览器的执行路径并返回
-    def get_chromium_path(self) -> str:
-        if getattr(sys, "frozen", False):
-            chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
-        else:
-            # !: 这里的路径可能需要根据自己电脑的实际情况进行修改(这里使用默认的是下载路径)
-            chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
-        return chromium_path
-
     @staticmethod
     def is_network_connected() -> bool:
         process = subprocess.Popen(
@@ -52,6 +35,39 @@ class funcDocker(object):
                     count += 1
                     if count >= 2:
                         return True
+
+    # 从login_config.ini中读取并返回账号和密码
+    def get_info(self) -> tuple:
+        config = configparser.ConfigParser()
+        config.read("./login_config.ini")
+        account = config.get("info", "account")
+        password = config.get("info", "password")
+        return account, password
+
+    # 获取chromium浏览器的执行路径并返回
+    def get_chromium_path(self) -> str:
+        if getattr(sys, "frozen", False):
+            chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
+        else:
+            # !: 这里的路径可能需要根据自己电脑的实际情况进行修改(这里使用默认的是下载路径)
+            chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
+        return chromium_path
+
+    # 判断是否存在网线接入
+    def select_network_mode(self):
+        output = subprocess.check_output("ipconfig /all", shell=True)
+        # 将输出按照\r\n\r\n进行分割
+        try:
+            output = output.decode("utf-8").split("\r\n\r\n")
+        except UnicodeDecodeError:
+            output = output.decode("gbk").split("\r\n\r\n")
+        # 取第四段输出，即有线网卡的输出
+        output_for_broadband = output[3]
+        # 通过是否存在租约时间来判断是否有网线介入
+        current_year = str(datetime.datetime.now().year)
+        if current_year in output_for_broadband:
+            return 1
+        return self.is_ahu_portal_connected()
 
     # 判断是否为已连接ahu.portal
     def is_ahu_portal_connected(self):
@@ -77,22 +93,6 @@ class funcDocker(object):
             )
             return exit()
         return 2
-
-    # 判断是否存在网线接入
-    def select_network_mode(self):
-        output = subprocess.check_output("ipconfig /all", shell=True)
-        # 将输出按照\r\n\r\n进行分割
-        try:
-            output = output.decode("utf-8").split("\r\n\r\n")
-        except UnicodeDecodeError:
-            output = output.decode("gbk").split("\r\n\r\n")
-        # 取第四段输出，即有线网卡的输出
-        output_for_broadband = output[3]
-        # 通过是否存在租约时间来判断是否有网线介入
-        current_year = str(datetime.datetime.now().year)
-        if current_year in output_for_broadband:
-            return 1
-        return self.is_ahu_portal_connected()
 
     # 执行自动登录的主要逻辑
     def run_auto_login(self):
