@@ -51,7 +51,7 @@ password = 000000
 
 ## todo_list
 
-- [ ] 为即会使用带后缀的有线宽带和无线宽带的安大人提供自动选择(即检查是否存在有线网络连接, 没有则使用没有后缀的账号登录)
+- [x] 为即会使用带后缀的有线宽带和无线宽带的安大人提供自动选择(即检查是否存在有线网络连接, 没有则使用没有后缀的账号登录)
 - [ ] 提供远程更新服务
 - [ ] 提供异常情况处理
 - [ ] 提供登录后自动打开ini中指定的网页或路径下的程序
@@ -63,5 +63,5 @@ password = 000000
 3. 可以愉快的运行了
 4. 打包指令(请找到你自己的chrome-win路径以替换以下指令中的path_to_chrome-win)
 ```shell
-pyinstaller --onefile --noconsole --add-data "path_to_chrome-win\chrome-win;chrome-win" --name=校园网自动登录 .\auto_login.py
+pyinstaller --onefile --noconsole --add-data "path_to_chrome-win\chrome-win;chrome-win" --hidden-import=plyer.platforms.win.notification --name=校园网自动登录1.1 .\auto_login.py
 ```
