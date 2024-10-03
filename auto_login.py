@@ -83,10 +83,11 @@ class funcDocker(object):
 
     # 连接至ahu.portal
     def link_to_ahu_portal(self):
-        output = subprocess.check_output(
-            'netsh wlan connect name="ahu.portal"', shell=True, text=True
-        )
-        if "0x80342002" in output:
+        try:
+            subprocess.check_output(
+                'netsh wlan connect name="ahu.portal"', shell=True, text=True
+            )
+        except subprocess.CalledProcessError:
             notification.notify(
                 title="错误",
                 message="没有网线接入且WLAN未打开, 程序即将退出",
@@ -123,6 +124,12 @@ class funcDocker(object):
             page.wait_for_timeout(1000)
 
             browser.close()
+            notification.notify(
+                title="已完成登录操作",
+                message="(或许)可以愉快地冲浪了",
+                # app_icon="D:/00__Chrome_Download/13378567.png",
+                timeout=3,
+            )
 
 
 if __name__ == "__main__":
