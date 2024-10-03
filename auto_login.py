@@ -114,7 +114,7 @@ class funcDocker(object):
                 page.goto("http://172.26.0.1/")
                 page.fill(
                     'input[class="edit_lobo_cell"][name="DDDDD"]',
-                    f"{self.account.split('@')[0] if "@" in self.account else self.account }",
+                    f"{self.account.split('@')[0] if '@' in self.account else self.account }",
                 )
 
             page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
