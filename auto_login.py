@@ -98,7 +98,7 @@ class funcDocker(object):
                 # app_icon="D:/00__Chrome_Download/13378567.png",
                 timeout=5,
             )
-            return exit()
+            return sys.exit()
         return 2
 
     # 执行自动登录的主要逻辑
@@ -144,7 +144,7 @@ if __name__ == "__main__":
             # app_icon="D:/00__Chrome_Download/13378567.png",
             timeout=3,
         )
-        exit()
+        sys.exit()
 
     func_docker = funcDocker()
 
