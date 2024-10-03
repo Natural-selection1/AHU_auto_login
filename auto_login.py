@@ -64,7 +64,11 @@ class funcDocker(object):
         except UnicodeDecodeError:
             output = output.decode("gbk").split("\r\n\r\n")
         # 取第四段输出，即有线网卡的输出
-        output_for_broadband = output[3]
+        for offset, _ in enumerate(output):
+            if "以太网" in _:
+                output_for_broadband = output[offset + 1]
+                break
+
         # 通过是否存在租约时间来判断是否有网线介入
         current_year = str(datetime.datetime.now().year)
         if current_year in output_for_broadband:
