@@ -1,5 +1,9 @@
 login_config.ini
 杂项.py
+hashes.txt
+chunk_1.txt
+chunk_2.txt
+chunk_3.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
