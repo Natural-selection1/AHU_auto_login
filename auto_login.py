@@ -13,7 +13,7 @@ from win32com import client
 class funcDocker(object):
     def __init__(self):
         # 初始化账号和密码，以及chromium的路径
-        self.account, self.password = self.get_info()
+        self.account, self.password, self.is_auto_update = self.get_info()
         self.chromium_path = self.get_chromium_path()
         self.flag = self.select_network_mode()
 
@@ -56,7 +56,8 @@ class funcDocker(object):
         config.read("./login_config.ini")
         account = config.get("info", "account")
         password = config.get("info", "password")
-        return account, password
+        is_auto_update = config.get("options", "is_auto_update")
+        return account, password, is_auto_update
 
     # 获取chromium浏览器的执行路径并返回
     def get_chromium_path(self) -> str:
@@ -117,7 +118,7 @@ class funcDocker(object):
     def run_auto_login(self):
         with sync_api.sync_playwright() as p:
             browser = p.chromium.launch(
-                headless=False,  # *: 若要调试，请将headless=False
+                headless=True,  # *: 若要调试，请将headless=False
                 executable_path=self.chromium_path,
             )
             page = browser.new_page()
@@ -146,6 +147,19 @@ class funcDocker(object):
                 # app_icon="D:/00__Chrome_Download/13378567.png",
                 timeout=3,
             )
+            if self.is_auto_update == "True" and funcDocker.diff_version():
+                notification.notify(
+                    title="版本更新",
+                    message="发现新版本, 即将自动更新",
+                    # app_icon="D:/00__Chrome_Download/13378567.png",
+                    timeout=5,
+                )
+                subprocess.Popen(
+                    f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
+                    shell=True,
+                )
+
+                sys.exit()
 
 
 if __name__ == "__main__":
@@ -156,7 +170,7 @@ if __name__ == "__main__":
             # app_icon="D:/00__Chrome_Download/13378567.png",
             timeout=3,
         )
-    if funcDocker.diff_version():
+    if funcDocker.is_auto_update == "True" and funcDocker.diff_version():
         notification.notify(
             title="版本更新",
             message="发现新版本, 即将自动更新",
@@ -164,7 +178,7 @@ if __name__ == "__main__":
             timeout=5,
         )
         subprocess.Popen(
-            f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')} /silent",
+            f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
             shell=True,
         )
 
