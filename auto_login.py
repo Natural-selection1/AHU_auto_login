@@ -108,7 +108,7 @@ class funcDocker(object):
             notification.notify(
                 title="错误",
                 message="没有网线接入且WLAN未打开, 程序即将退出",
-                # app_icon="D:/00__Chrome_Download/13378567.png",
+                # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=5,
             )
             return sys.exit()
@@ -144,14 +144,14 @@ class funcDocker(object):
             notification.notify(
                 title="已完成登录操作",
                 message="(或许)可以愉快地冲浪了",
-                # app_icon="D:/00__Chrome_Download/13378567.png",
+                # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
             if self.is_auto_update == "True" and funcDocker.diff_version():
                 notification.notify(
                     title="版本更新",
                     message="发现新版本, 即将自动更新",
-                    # app_icon="D:/00__Chrome_Download/13378567.png",
+                    # app_icon="E:/00__Chrome_Download/13378567.ico",
                     timeout=5,
                 )
                 subprocess.Popen(
@@ -167,19 +167,8 @@ if __name__ == "__main__":
         notification.notify(
             title="已存在网络连接",
             message="检查到已经存在网络连接,程序即将退出",
-            # app_icon="D:/00__Chrome_Download/13378567.png",
+            # app_icon="E:/00__Chrome_Download/13378567.ico",
             timeout=3,
-        )
-    if funcDocker.is_auto_update == "True" and funcDocker.diff_version():
-        notification.notify(
-            title="版本更新",
-            message="发现新版本, 即将自动更新",
-            # app_icon="D:/00__Chrome_Download/13378567.png",
-            timeout=5,
-        )
-        subprocess.Popen(
-            f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
-            shell=True,
         )
 
         sys.exit()
