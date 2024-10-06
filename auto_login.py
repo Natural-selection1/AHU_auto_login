@@ -13,7 +13,7 @@ from win32com import client
 class funcDocker(object):
     def __init__(self):
         # 初始化账号和密码，以及chromium的路径
-        self.account, self.password, self.is_auto_update = self.get_info()
+        self.account, self.password = self.get_info()
         self.chromium_path = self.get_chromium_path()
         self.flag = self.select_network_mode()
 
@@ -56,8 +56,8 @@ class funcDocker(object):
         config.read("./login_config.ini")
         account = config.get("info", "account")
         password = config.get("info", "password")
-        is_auto_update = config.get("options", "is_auto_update")
-        return account, password, is_auto_update
+
+        return account, password
 
     # 获取chromium浏览器的执行路径并返回
     def get_chromium_path(self) -> str:
@@ -147,13 +147,7 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
-            if self.is_auto_update == "True" and funcDocker.diff_version():
-                notification.notify(
-                    title="版本更新",
-                    message="发现新版本, 即将自动更新",
-                    # app_icon="E:/00__Chrome_Download/13378567.ico",
-                    timeout=5,
-                )
+            if funcDocker.diff_version():
                 subprocess.Popen(
                     f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
                     shell=True,
