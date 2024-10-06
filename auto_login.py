@@ -32,8 +32,13 @@ class funcDocker(object):
             output = process.stdout.readline()
             if output:
                 line = output.decode().strip()
-                # print(line)
-                if "Request timed out." in line or "超时" in line:
+
+                if (
+                    "Request timed out" in line
+                    or "请求超时" in line
+                    or "Destination host unreachable" in line
+                    or "无法访问目标主机" in line
+                ):
                     return False  # 如果超时，返回 False
                 if "=" in line:  # 计数正常回显次数
                     count += 1
@@ -136,7 +141,7 @@ class funcDocker(object):
                     'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
                 )
             if self.flag == 2:
-                page.goto("http://172.26.0.1/")
+                page.goto("http://172.21.0.1/")
                 page.fill(
                     'input[class="edit_lobo_cell"][name="DDDDD"]',
                     f"{self.account.split('@')[0] if '@' in self.account else self.account }",
