@@ -142,7 +142,6 @@ class UpdateExe:
 if __name__ == "__main__":
     """主程序入口."""
     print("更新程序运行了")
-
     update_exe = UpdateExe()
 
     update_exe.get_files()

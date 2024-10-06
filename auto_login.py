@@ -4,9 +4,10 @@ import os
 import subprocess
 import sys
 
-
+import requests
 from playwright import sync_api  # 用于自动化操作浏览器
 from plyer import notification  # 用于发送windows通知
+from win32com import client
 
 
 class funcDocker(object):
@@ -38,6 +39,25 @@ class funcDocker(object):
                     count += 1
                     if count >= 2:
                         return True
+
+    def diff_version(self) -> bool:
+        try:
+            remote_url = "https://cdn.githubraw.com/Natural-selection1/AHU_auto_login/main/version.txt"
+            response = requests.get(remote_url)
+        except requests.exceptions.RequestException:
+            print("请求发生错误, 即将退出更新程序")
+            sys.exit()
+        if response.status_code != 200:
+            print("没有正常访问到CDN, 即将退出更新程序")
+            sys.exit()
+        remote_version = response.text.strip()
+
+        information_parser = client.Dispatch("Scripting.FileSystemObject")
+        local_version = information_parser.GetFileVersion(sys.executable)
+        print(f"本地版本: {local_version}")
+        if local_version == remote_version:
+            print("当前版本已是最新版本, 无需更新")
+        return local_version != remote_version
 
     # 从login_config.ini中读取并返回账号和密码
     def get_info(self) -> tuple:
@@ -136,7 +156,7 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
-
+        if self.diff_version():
             subprocess.Popen(
                 f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
                 shell=True,
@@ -152,7 +172,6 @@ if __name__ == "__main__":
             # app_icon="E:/00__Chrome_Download/13378567.ico",
             timeout=3,
         )
-
         sys.exit()
 
     func_docker = funcDocker()
