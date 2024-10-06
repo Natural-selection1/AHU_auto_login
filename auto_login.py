@@ -147,13 +147,13 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
-            if funcDocker.diff_version():
-                subprocess.Popen(
-                    f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
-                    shell=True,
-                )
+        if funcDocker.diff_version():
+            subprocess.Popen(
+                f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
+                shell=True,
+            )
 
-                sys.exit()
+        sys.exit()
 
 
 if __name__ == "__main__":
