@@ -22,7 +22,7 @@ class funcDocker(object):
     def is_network_connected() -> bool:
         # 流式输出ping命令的结果，以便及时处理
         process = subprocess.Popen(
-            "ping 103.235.47.188",
+            "ping 121.194.11.72",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
