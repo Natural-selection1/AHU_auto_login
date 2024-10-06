@@ -4,10 +4,9 @@ import os
 import subprocess
 import sys
 
-import requests
+
 from playwright import sync_api  # 用于自动化操作浏览器
 from plyer import notification  # 用于发送windows通知
-from win32com import client
 
 
 class funcDocker(object):
@@ -39,18 +38,6 @@ class funcDocker(object):
                     count += 1
                     if count >= 2:
                         return True
-
-    @staticmethod
-    def diff_version() -> bool:
-        information_parser = client.Dispatch("Scripting.FileSystemObject")
-        version = information_parser.GetFileVersion(sys.executable)
-
-        remote_version_url = "https://raw.githubusercontent.com/Natural-selection1/AHU_auto_login/main/version.txt"
-        remote_version = requests.get(
-            remote_version_url, headers={"Connection": "close"}
-        ).text.strip()
-
-        return version != remote_version
 
     # 从login_config.ini中读取并返回账号和密码
     def get_info(self) -> tuple:
@@ -149,13 +136,12 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
-        if funcDocker.diff_version():
+
             subprocess.Popen(
-                f"{os.path.join(os.path.dirname(os.path.abspath(__file__)), 'update.exe')}",
+                f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
                 shell=True,
             )
-
-        sys.exit()
+        return
 
 
 if __name__ == "__main__":
