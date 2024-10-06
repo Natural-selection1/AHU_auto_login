@@ -39,11 +39,11 @@ class funcDocker(object):
                     or "Destination host unreachable" in line
                     or "无法访问目标主机" in line
                 ):
-                    return False  # 如果超时，返回 False
-                if "=" in line:  # 计数正常回显次数
                     count += 1
                     if count >= 2:
-                        return True
+                        return False  # 如果超时，返回 False
+                if "=" in line:  # 计数正常回显次数
+                    return True
 
     def diff_version(self) -> bool:
         try:
