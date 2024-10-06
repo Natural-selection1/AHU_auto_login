@@ -54,9 +54,7 @@ class funcDocker(object):
 
         information_parser = client.Dispatch("Scripting.FileSystemObject")
         local_version = information_parser.GetFileVersion(sys.executable)
-        print(f"本地版本: {local_version}")
-        if local_version == remote_version:
-            print("当前版本已是最新版本, 无需更新")
+
         return local_version != remote_version
 
     # 从login_config.ini中读取并返回账号和密码
@@ -77,8 +75,8 @@ class funcDocker(object):
             chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
         return chromium_path
 
-    # 判断是否存在网线接入
-    def select_network_mode(self):
+    # 判断网络连接模式
+    def select_network_mode(self) -> int:
         output = subprocess.check_output("ipconfig /all", shell=True)
         # 将输出按照\r\n\r\n进行分割
         try:
@@ -98,7 +96,7 @@ class funcDocker(object):
         return self.is_ahu_portal_connected()
 
     # 判断是否为已连接ahu.portal
-    def is_ahu_portal_connected(self):
+    def is_ahu_portal_connected(self) -> int:
         # 执行 netsh wlan show interfaces 并检查是否有连接到 ahu.portal
         output = subprocess.check_output(
             "netsh wlan show interfaces", shell=True, text=True
@@ -108,7 +106,7 @@ class funcDocker(object):
         return self.link_to_ahu_portal()
 
     # 连接至ahu.portal
-    def link_to_ahu_portal(self):
+    def link_to_ahu_portal(self) -> int:
         try:
             subprocess.check_output(
                 'netsh wlan connect name="ahu.portal"', shell=True, text=True
@@ -120,11 +118,11 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=5,
             )
-            return sys.exit()
+            sys.exit()
         return 2
 
     # 执行自动登录的主要逻辑
-    def run_auto_login(self):
+    def run_auto_login(self) -> None:
         with sync_api.sync_playwright() as p:
             browser = p.chromium.launch(
                 headless=True,  # *: 若要调试，请将headless=False
@@ -156,11 +154,12 @@ class funcDocker(object):
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
-        if self.diff_version():
-            subprocess.Popen(
-                f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
-                shell=True,
-            )
+
+            if os.path.exists("update.exe") and self.diff_version():
+                subprocess.Popen(
+                    f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
+                    shell=True,
+                )
         return
 
 
