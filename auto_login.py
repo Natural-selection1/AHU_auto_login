@@ -46,7 +46,9 @@ class funcDocker(object):
         version = information_parser.GetFileVersion(sys.executable)
 
         remote_version_url = "https://raw.githubusercontent.com/Natural-selection1/AHU_auto_login/main/version.txt"
-        remote_version = requests.get(remote_version_url).text.strip()
+        remote_version = requests.get(
+            remote_version_url, headers={"Connection": "close"}
+        ).text.strip()
 
         return version != remote_version
 
