@@ -41,8 +41,8 @@ class funcDocker(object):
                 ):
                     count += 1
                     if count >= 2:
-                        return False  # 如果超时，返回 False
-                if "=" in line:  # 计数正常回显次数
+                        return False
+                if "=" in line:
                     return True
 
     def diff_version(self) -> bool:
@@ -141,7 +141,17 @@ class funcDocker(object):
                     'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
                 )
             if self.flag == 2:
-                page.goto("http://172.21.0.1/")
+                try:
+                    page.goto("http://172.21.0.1/")
+                except Exception as e:
+                    if "net::ERR_CONNECTION_REFUSED" in str(e):
+                        notification.notify(
+                            title="已完成登录操作",
+                            message="(或许)可以愉快地冲浪了",
+                            # app_icon="E:/00__Chrome_Download/13378567.ico",
+                            timeout=3,
+                        )
+                        return
                 page.fill(
                     'input[class="edit_lobo_cell"][name="DDDDD"]',
                     f"{self.account.split('@')[0] if '@' in self.account else self.account }",
@@ -155,7 +165,7 @@ class funcDocker(object):
             browser.close()
             notification.notify(
                 title="已完成登录操作",
-                message="(或许)可以愉快地冲浪了",
+                message="可以愉快地冲浪了",
                 # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
