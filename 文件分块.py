@@ -1,5 +1,5 @@
-import os
 import hashlib
+import os
 
 
 def split_exe_with_hash(file_path, chunk_size):

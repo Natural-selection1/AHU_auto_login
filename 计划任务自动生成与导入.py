@@ -1,7 +1,6 @@
-import subprocess
 import os
+import subprocess
 import sys
-
 
 user_id = subprocess.check_output("whoami", shell=True).decode().strip()
 main_exe = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), '安徽大学校园网自动登录.exe')}"
