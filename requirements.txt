@@ -1,2 +1,6 @@
 requests
 psutil
+requests
+playwright
+plyer
+win32com

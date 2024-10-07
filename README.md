@@ -12,7 +12,7 @@
 
 ## 准备工作
 
-1. 找到这个脚本所在的目录, 在其相同路径下修改"example.ini"文件名为"login_config.ini"
+1. 在release中下载最新版本的zip包并解压
 2. 在"login_config.ini"文件中写入以下内容并保存:
 
 ```ini
@@ -20,8 +20,6 @@
 account = 这里是平常登录校园网的账号(即学号)(有线的话记得把后缀带上)
 password = 这里是平常登录校园网的密码(也就是身份证后六位)
 ```
-
-
 
 下面是样例:
 
@@ -36,17 +34,14 @@ password = 000000
 
 ## 配置开机自动运行
 
-~~了解过windows server貌似可以已非常高的优先级运行, 但是我没学过, 所以就在这里写了, 需要的自己去配置~~
-
-1. 右键exe文件, 创建它的快捷方式
-2. 找到路径C:\Users\这里是你的用户名\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
-3. 将快捷方式放到该目录下, 就可以实现开机自启动了
+1. 以管理员身份运行 计划任务自动生成与导入器.exe
 
 ## 注意事项
 
 1. 在ini中填写的必须是英文符号!!!!!!
-2. 如果你配置了开机自启动, 请打开 任务管理器(快捷键是Ctrl+Shift+Esc) 找到 **启动应用** 并使其状态为 **已启用**
-3. 其他问题请去github 仓库 提issue 或者联系我的邮箱
+2. 如果你配置了开机自启动, 则不可以再移动文件
+3. 请不要随意修改文件名
+4. 其他问题请去github 仓库 提issue 或者联系我的邮箱
 
 
 ## todo_list
@@ -58,10 +53,20 @@ password = 000000
 
 
 ## 如果你想本地构建的话
-1. pip install playwright
+1. pip install requirements.txt
 2. playwright install chromium ~~(安装成功后会显示安装路径, 请记住它)~~
 3. 可以愉快的运行了
 4. 打包指令(请找到你自己的chrome-win路径以替换以下指令中的path_to_chrome-win)
+
+for 安徽大学校园网自动登录.exe
 ```shell
-pyinstaller --onefile --noconsole --add-data "path_to_chrome-win\chrome-win;chrome-win" --hidden-import=plyer.platforms.win.notification --name=校园网自动登录1.1 .\auto_login.py
+pyinstaller --onefile --noconsole --add-data "path_to_chrome-win\chrome-win;chrome-win" --hidden-import=plyer.platforms.win.notification --name=安徽大学校园网自动登录 --version-file .\the_version_info.txt .\auto_login.py
+```
+for update.exe
+```shell
+pyinstaller --onefile --name=update .\update.py
+```
+for 计划任务自动生成与导入.exe
+```shell
+pyinstaller --onefile --name=计划任务自动生成与导入 .\计划任务自动生成与导入.py
 ```
