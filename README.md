@@ -53,7 +53,7 @@ password = 000000
 
 
 ## 如果你想本地构建的话
-1. pip install requirements.txt
+1. pip install -r requirements.txt
 2. playwright install chromium ~~(安装成功后会显示安装路径, 请记住它)~~
 3. 可以愉快的运行了
 4. 打包指令(请找到你自己的chrome-win路径以替换以下指令中的path_to_chrome-win)
