@@ -3,7 +3,7 @@ revision = 1
 requires-python = ">=3.11"
 
 [[package]]
-name = "00-ahu-auto-login"
+name = "ahu-auto-login"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
