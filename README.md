@@ -1,14 +1,10 @@
 # 安徽大学校园网自动登录脚本~~~
 
-~~终于可以不用再看跳出来的网页辣~~
-
-> 作者: 安徽大学 23级 物理网工程一班 高统军
+> 作者: 安徽大学 23级 物理网工程一班 代何归
 > github_repo: https://github.com/Natural-selection1/AHU_auto_login
 > 联系方式: natural_selection_@outlook.com
 
-~~本来说一直想做的,结果一直拖到现在(拖延症重度患者)~~
-
-本脚本仅适用于安徽大学的校园网登录(支持有线)(反正只要是通过那个网页登录的就都可以), 并不适用于其他的网络
+本脚本仅适用于安徽大学的校园网登录, 支持有线和无线(无线支持不完全)
 
 ## 准备工作
 
@@ -54,7 +50,7 @@ password = 000000
 
 ## 如果你想本地构建的话
 1. pip install -r requirements.txt
-2. playwright install chromium ~~(安装成功后会显示安装路径, 请记住它)~~
+2. playwright install chromium (安装成功后会显示安装路径, 请记住它)
 3. 可以愉快的运行了
 4. 打包指令(请找到你自己的chrome-win路径以替换以下指令中的path_to_chrome-win)
 

@@ -8,5 +8,6 @@ dependencies = [
     "playwright>=1.51.0",
     "plyer>=2.1.0",
     "psutil>=7.0.0",
+    "pyinstaller>=6.13.0",
     "requests>=2.32.3",
 ]

@@ -121,7 +121,6 @@ class funcDocker(object):
             notification.notify(
                 title="错误",
                 message="没有网线接入且WLAN未打开, 程序即将退出",
-                # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=5,
             )
             sys.exit()
@@ -150,7 +149,6 @@ class funcDocker(object):
                         notification.notify(
                             title="已完成登录操作",
                             message="(或许)可以愉快地冲浪了",
-                            # app_icon="E:/00__Chrome_Download/13378567.ico",
                             timeout=3,
                         )
                         return
@@ -170,7 +168,6 @@ class funcDocker(object):
             notification.notify(
                 title="已完成登录操作",
                 message="可以愉快地冲浪了",
-                # app_icon="E:/00__Chrome_Download/13378567.ico",
                 timeout=3,
             )
 
@@ -187,7 +184,6 @@ if __name__ == "__main__":
         notification.notify(
             title="已存在网络连接",
             message="检查到已经存在网络连接,程序即将退出",
-            # app_icon="E:/00__Chrome_Download/13378567.ico",
             timeout=3,
         )
         sys.exit()
