@@ -11,6 +11,7 @@ def split_exe_with_hash(file_path, chunk_size):
 
     with open(file_path, "rb") as file:
         chunk_num = 0
+
         while True:
             chunk = file.read(chunk_size)
             if not chunk:
@@ -31,7 +32,8 @@ def split_exe_with_hash(file_path, chunk_size):
             hash_file.write(h + "\n")
 
 
-split_exe_with_hash(
-    r"E:/0000_Python_Project/00__AHU_auto_login/dist/安徽大学校园网自动登录.exe",
-    1024 * 1024 * 19,
-)
+if __name__ == "__main__":
+    split_exe_with_hash(
+        r"dist/安徽大学校园网自动登录.exe",
+        1024 * 1024 * 19,
+    )
