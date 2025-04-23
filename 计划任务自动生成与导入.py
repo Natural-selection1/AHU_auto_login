@@ -7,7 +7,8 @@ dir_ = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)))}"
 main_exe = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), '安徽大学校园网自动登录.exe')}"
 
 # 原始XML内容
-xml_content = """<?xml version="1.0" encoding="UTF-16"?>
+xml_content = """\
+<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.3" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Date>2024-10-06T19:52:36.6071314</Date>
