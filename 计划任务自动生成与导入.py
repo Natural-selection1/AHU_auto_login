@@ -3,9 +3,8 @@ import subprocess
 import sys
 
 user_id = subprocess.check_output("whoami", shell=True).decode().strip()
-main_exe = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), '安徽大学校园网自动登录.exe')}"
-
 dir_ = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)))}"
+main_exe = f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), '安徽大学校园网自动登录.exe')}"
 
 # 原始XML内容
 xml_content = """<?xml version="1.0" encoding="UTF-16"?>
@@ -22,6 +21,8 @@ xml_content = """<?xml version="1.0" encoding="UTF-16"?>
     </SessionStateChangeTrigger>
     <LogonTrigger>
       <Enabled>true</Enabled>
+      <UserId>{}</UserId>
+      <Delay>PT1S</Delay>
     </LogonTrigger>
   </Triggers>
   <Principals>
@@ -62,7 +63,7 @@ xml_content = """<?xml version="1.0" encoding="UTF-16"?>
 """
 
 # 替换UserId, Command 和 WorkingDirectory
-xml_content = xml_content.format(user_id, main_exe, dir_)
+xml_content = xml_content.format(user_id, user_id, main_exe, dir_)
 
 # 将结果写入新的XML文件
 output_file_path = "AHU_auto_login.xml"
