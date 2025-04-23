@@ -1,0 +1,12 @@
+[project]
+name = "ahu-auto-login"
+version = "0.1.0"
+description = "安徽大学校园网自动登录"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "playwright>=1.51.0",
+    "plyer>=2.1.0",
+    "psutil>=7.0.0",
+    "requests>=2.32.3",
+]
