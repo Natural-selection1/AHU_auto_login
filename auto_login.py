@@ -12,7 +12,7 @@ from win32com import client
 
 class funcDocker(object):
     def __init__(self):
-        # 初始化账号和密码，以及chromium的路径
+        """初始化账号和密码，chromium路径, 网络连接模式"""
         self.account, self.password = self.get_info()
         self.chromium_path = self.get_chromium_path()
         self.flag = self.select_network_mode()
@@ -30,18 +30,19 @@ class funcDocker(object):
         count = 0
         while True:
             output = process.stdout.readline()
+
             if output:
                 line = output.decode().strip()
 
-                if (
-                    "Request timed out" in line
-                    or "请求超时" in line
-                    or "Destination host unreachable" in line
-                    or "无法访问目标主机" in line
+                if any(
+                    x in line  # x in line 则 any() is True
+                    for x in ("timed out", "超时", "unreachable", "无法访问")
                 ):
                     count += 1
+
                     if count >= 2:
                         return False
+
                 if "=" in line:
                     return True
 
@@ -81,7 +82,7 @@ class funcDocker(object):
         return chromium_path
 
     # 判断网络连接模式
-    def select_network_mode(self) -> int:
+    def select_network_mode(self) -> str:
         output = subprocess.check_output("ipconfig /all", shell=True)
         # 将输出按照\r\n\r\n进行分割
         try:
@@ -97,21 +98,21 @@ class funcDocker(object):
         # 通过是否存在租约时间来判断是否有网线介入
         current_year = str(datetime.datetime.now().year)
         if current_year in output_for_broadband:
-            return 1
+            return "有线网"
         return self.is_ahu_portal_connected()
 
     # 判断是否为已连接ahu.portal
-    def is_ahu_portal_connected(self) -> int:
+    def is_ahu_portal_connected(self) -> str:
         # 执行 netsh wlan show interfaces 并检查是否有连接到 ahu.portal
         output = subprocess.check_output(
             "netsh wlan show interfaces", shell=True, text=True
         )
         if "ahu.portal" in output:
-            return 2
+            return "无线网"
         return self.link_to_ahu_portal()
 
     # 连接至ahu.portal
-    def link_to_ahu_portal(self) -> int:
+    def link_to_ahu_portal(self) -> str:
         try:
             subprocess.check_output(
                 'netsh wlan connect name="ahu.portal"', shell=True, text=True
@@ -124,7 +125,7 @@ class funcDocker(object):
                 timeout=5,
             )
             sys.exit()
-        return 2
+        return "无法连接至ahu.portal"
 
     # 执行自动登录的主要逻辑
     def run_auto_login(self) -> None:
@@ -135,14 +136,15 @@ class funcDocker(object):
             )
             page = browser.new_page()
 
-            if self.flag == 1:
+            if self.flag == "有线网":
                 page.goto("http://172.16.253.3/")
                 page.fill(
                     'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
                 )
-            if self.flag == 2:
+            if self.flag == "无线网":
                 try:
                     page.goto("http://172.21.0.1/")
+
                 except Exception as e:
                     if "net::ERR_CONNECTION_REFUSED" in str(e):
                         notification.notify(
@@ -152,9 +154,10 @@ class funcDocker(object):
                             timeout=3,
                         )
                         return
+
                 page.fill(
                     'input[class="edit_lobo_cell"][name="DDDDD"]',
-                    f"{self.account.split('@')[0] if '@' in self.account else self.account }",
+                    f"{self.account.split('@')[0] if '@' in self.account else self.account}",
                 )
 
             page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
@@ -163,6 +166,7 @@ class funcDocker(object):
             page.wait_for_timeout(1000)
 
             browser.close()
+
             notification.notify(
                 title="已完成登录操作",
                 message="可以愉快地冲浪了",
