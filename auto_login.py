@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import threading
+import asyncio
 import time
 
 import requests
@@ -147,8 +148,6 @@ class funcDocker(object):
         )
         self.page.click('input[value="登录"]')
 
-        # self.page.wait_for_timeout(800)
-
         self.close_browser()
 
         notification.notify(
@@ -183,10 +182,7 @@ def check_network():
         if output:
             line = output.decode().strip()
 
-            if any(
-                x in line  # x in line 则 any() is True
-                for x in ("timed out", "超时", "unreachable", "无法访问")
-            ):
+            if any(x in line for x in ("timed out", "超时", "unreachable", "无法访问")):
                 # count += 1
 
                 # if count >= 2:
@@ -209,11 +205,25 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # 用于存储网络检查结果的变量
-    network_check_result = [False]  # 使用列表作为可变对象传递结果
+    network_check_result = [False, False]  # 使用列表作为可变对象传递结果
 
     # 定义线程目标函数
     def thread_check_network():
-        network_check_result[0] = check_network()
+        # 创建两个线程分别检查网络
+        thread1 = threading.Thread(target=lambda: set_result(0))
+        thread2 = threading.Thread(target=lambda: set_result(1))
+
+        # 定义设置结果的函数
+        def set_result(index):
+            network_check_result[index] = check_network()
+
+        # 启动线程
+        thread1.start()
+        thread2.start()
+
+        # 等待两个线程完成
+        thread1.join()
+        thread2.join()
 
     # 创建并启动线程
     network_thread = threading.Thread(target=thread_check_network)
@@ -233,7 +243,7 @@ if __name__ == "__main__":
     network_thread.join()
 
     # 使用线程中已获取的结果，而不是重新调用check_network
-    if network_check_result[0]:
+    if any(network_check_result):
         # 如果网络已连接，关闭浏览器并退出
         func_docker.close_browser()
         notification.notify(
@@ -245,6 +255,9 @@ if __name__ == "__main__":
 
     # 否则继续执行登录操作
     func_docker.run_auto_login()
+
+    end_time = time.time()
+    print(f"完成登录操作时间: {end_time - start_time} 秒")
 
 
 # *: 以下是通知模版
