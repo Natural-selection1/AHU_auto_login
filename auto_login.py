@@ -3,6 +3,8 @@ import datetime
 import os
 import subprocess
 import sys
+import threading
+import time
 
 import requests
 from playwright import sync_api  # 用于自动化操作浏览器
@@ -16,35 +18,8 @@ class funcDocker(object):
         self.account, self.password = self.get_info()
         self.chromium_path = self.get_chromium_path()
         self.flag = self.select_network_mode()
-
-    @staticmethod
-    # 检查是否已经存在可用的网络连接
-    def is_network_connected() -> bool:
-        # 流式输出ping命令的结果，以便及时处理
-        process = subprocess.Popen(
-            "ping 121.194.11.72",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        count = 0
-        while True:
-            output = process.stdout.readline()
-
-            if output:
-                line = output.decode().strip()
-
-                if any(
-                    x in line  # x in line 则 any() is True
-                    for x in ("timed out", "超时", "unreachable", "无法访问")
-                ):
-                    count += 1
-
-                    if count >= 2:
-                        return False
-
-                if "=" in line:
-                    return True
+        self.browser = None
+        self.page = None
 
     def diff_version(self) -> bool:
         try:
@@ -126,70 +101,149 @@ class funcDocker(object):
             sys.exit()
         return "无法连接至ahu.portal"
 
+    # 初始化浏览器
+    def init_browser(self):
+        self.playwright = sync_api.sync_playwright().start()
+        self.browser = self.playwright.chromium.launch(
+            headless=True,  # *: 若要调试，请将headless=False
+            executable_path=self.chromium_path,
+        )
+        self.page = self.browser.new_page()
+
+    # 关闭浏览器
+    def close_browser(self):
+        if self.browser:
+            self.browser.close()
+            self.playwright.stop()
+
     # 执行自动登录的主要逻辑
     def run_auto_login(self) -> None:
-        with sync_api.sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,  # *: 若要调试，请将headless=False
-                executable_path=self.chromium_path,
+        if self.flag == "有线网":
+            self.page.goto("http://172.16.253.3/")
+            self.page.fill(
+                'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
             )
-            page = browser.new_page()
+        if self.flag == "无线网":
+            try:
+                self.page.goto("http://172.21.0.1/")
 
-            if self.flag == "有线网":
-                page.goto("http://172.16.253.3/")
-                page.fill(
-                    'input[class="edit_lobo_cell"][name="DDDDD"]', f"{self.account}"
-                )
-            if self.flag == "无线网":
-                try:
-                    page.goto("http://172.21.0.1/")
+            except Exception as e:
+                if "net::ERR_CONNECTION_REFUSED" in str(e):
+                    notification.notify(
+                        title="已完成登录操作",
+                        message="(或许)可以愉快地冲浪了",
+                        timeout=3,
+                    )
+                    self.close_browser()
+                    return
 
-                except Exception as e:
-                    if "net::ERR_CONNECTION_REFUSED" in str(e):
-                        notification.notify(
-                            title="已完成登录操作",
-                            message="(或许)可以愉快地冲浪了",
-                            timeout=3,
-                        )
-                        return
-
-                page.fill(
-                    'input[class="edit_lobo_cell"][name="DDDDD"]',
-                    f"{self.account.split('@')[0] if '@' in self.account else self.account}",
-                )
-
-            page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
-            page.click('input[value="登录"]')
-
-            page.wait_for_timeout(800)
-
-            browser.close()
-
-            notification.notify(
-                title="已完成登录操作",
-                message="可以愉快地冲浪了",
-                timeout=3,
+            self.page.fill(
+                'input[class="edit_lobo_cell"][name="DDDDD"]',
+                f"{self.account.split('@')[0] if '@' in self.account else self.account}",
             )
 
-            if os.path.exists("update.exe") and self.diff_version():
-                subprocess.Popen(
-                    f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
-                    shell=True,
-                )
+        self.page.fill(
+            'input[class="edit_lobo_cell"][name="upass"]', f"{self.password}"
+        )
+        self.page.click('input[value="登录"]')
+
+        # self.page.wait_for_timeout(800)
+
+        self.close_browser()
+
+        notification.notify(
+            title="已完成登录操作",
+            message="可以愉快地冲浪了",
+            timeout=3,
+        )
+
+        if os.path.exists("update.exe") and self.diff_version():
+            subprocess.Popen(
+                f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
+                shell=True,
+            )
         return
 
 
+def check_network():
+    """检查网络连接的线程函数"""
+    # 记录时间
+    start_time = time.time()
+
+    process = subprocess.Popen(
+        "ping 121.194.11.72",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    # count = 0
+    while True:
+        output = process.stdout.readline()
+
+        if output:
+            line = output.decode().strip()
+
+            if any(
+                x in line  # x in line 则 any() is True
+                for x in ("timed out", "超时", "unreachable", "无法访问")
+            ):
+                # count += 1
+
+                # if count >= 2:
+                is_connected = False
+                break
+
+            if "=" in line:
+                is_connected = True
+                break
+
+    # 记录时间
+    end_time = time.time()
+    print(f"网络检查时间: {end_time - start_time} 秒")
+
+    return is_connected
+
+
 if __name__ == "__main__":
-    if funcDocker.is_network_connected():
+    # 记录时间
+    start_time = time.time()
+
+    # 用于存储网络检查结果的变量
+    network_check_result = [False]  # 使用列表作为可变对象传递结果
+
+    # 定义线程目标函数
+    def thread_check_network():
+        network_check_result[0] = check_network()
+
+    # 创建并启动线程
+    network_thread = threading.Thread(target=thread_check_network)
+    network_thread.daemon = True
+    network_thread.start()
+
+    # 创建对象实例
+    func_docker = funcDocker()
+
+    # 主线程同时初始化浏览器
+    func_docker.init_browser()
+
+    end_time = time.time()
+    print(f"完成浏览器初始化时间: {end_time - start_time} 秒")
+
+    # 等待网络检查线程完成
+    network_thread.join()
+
+    # 使用线程中已获取的结果，而不是重新调用check_network
+    if network_check_result[0]:
+        # 如果网络已连接，关闭浏览器并退出
+        func_docker.close_browser()
         notification.notify(
             title="已存在网络连接",
-            message="检查到已经存在网络连接,程序即将退出",
+            message="检测到已经存在网络连接,程序即将退出",
             timeout=3,
         )
         sys.exit()
 
-    func_docker = funcDocker()
-
+    # 否则继续执行登录操作
     func_docker.run_auto_login()
 
 
