@@ -78,7 +78,7 @@ class funcDocker(object):
             chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
         else:
             # !: 这里的路径可能需要根据自己电脑的实际情况进行修改(这里使用默认的是下载路径)
-            chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1134\chrome-win\chrome.exe"
+            chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
         return chromium_path
 
     # 判断网络连接模式
@@ -161,7 +161,7 @@ class funcDocker(object):
             page.fill('input[class="edit_lobo_cell"][name="upass"]', f"{self.password}")
             page.click('input[value="登录"]')
 
-            page.wait_for_timeout(1000)
+            page.wait_for_timeout(800)
 
             browser.close()
 
