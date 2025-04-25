@@ -4,13 +4,25 @@ import os
 import subprocess
 import sys
 import threading
-import asyncio
 import time
+from functools import wraps
 
 import requests
 from playwright import sync_api  # 用于自动化操作浏览器
 from plyer import notification  # 用于发送windows通知
 from win32com import client
+
+
+def time_it(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} 执行时间: {end_time - start_time} 秒")
+        return result
+
+    return wrapper
 
 
 class funcDocker(object):
@@ -118,6 +130,7 @@ class funcDocker(object):
             self.playwright.stop()
 
     # 执行自动登录的主要逻辑
+    # @time_it
     def run_auto_login(self) -> None:
         if self.flag == "有线网":
             self.page.goto("http://172.16.253.3/")
@@ -164,48 +177,34 @@ class funcDocker(object):
         return
 
 
+# @time_it
 def check_network():
     """检查网络连接的线程函数"""
-    # 记录时间
-    start_time = time.time()
-
     process = subprocess.Popen(
         "ping 121.194.11.72",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    # count = 0
+
     while True:
         output = process.stdout.readline()
-
         if output:
             line = output.decode().strip()
-
             if any(x in line for x in ("timed out", "超时", "unreachable", "无法访问")):
-                # count += 1
-
-                # if count >= 2:
                 is_connected = False
                 break
-
             if "=" in line:
                 is_connected = True
                 break
 
-    # 记录时间
-    end_time = time.time()
-    print(f"网络检查时间: {end_time - start_time} 秒")
-
     return is_connected
 
 
-if __name__ == "__main__":
-    # 记录时间
-    start_time = time.time()
-
+# @time_it
+def main():
     # 用于存储网络检查结果的变量
-    network_check_result = [False, False]  # 使用列表作为可变对象传递结果
+    network_check_result = [False, False]
 
     # 定义线程目标函数
     def thread_check_network():
@@ -236,13 +235,8 @@ if __name__ == "__main__":
     # 主线程同时初始化浏览器
     func_docker.init_browser()
 
-    end_time = time.time()
-    print(f"完成浏览器初始化时间: {end_time - start_time} 秒")
-
-    # 等待网络检查线程完成
     network_thread.join()
 
-    # 使用线程中已获取的结果，而不是重新调用check_network
     if any(network_check_result):
         # 如果网络已连接，关闭浏览器并退出
         func_docker.close_browser()
@@ -253,11 +247,12 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    # 否则继续执行登录操作
+    # 否则执行登录操作
     func_docker.run_auto_login()
 
-    end_time = time.time()
-    print(f"完成登录操作时间: {end_time - start_time} 秒")
+
+if __name__ == "__main__":
+    main()
 
 
 # *: 以下是通知模版
