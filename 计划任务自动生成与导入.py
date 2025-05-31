@@ -65,15 +65,12 @@ xml_content = """\
 
 # 替换UserId, Command 和 WorkingDirectory
 xml_content = xml_content.format(user_id, user_id, main_exe, dir_)
-
 # 将结果写入新的XML文件
 output_file_path = "AHU_auto_login.xml"
 with open(output_file_path, "w", encoding="utf-16") as file:
     file.write(xml_content)
-
 # 导入生成的 XML 文件到计划任务中
 subprocess.run(
     f'schtasks /create /tn "AHU_auto_login" /xml "{output_file_path}"', shell=True
 )
-
 os.remove(output_file_path)

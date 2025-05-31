@@ -4,16 +4,7 @@ update/
 
 安徽大学校园网自动登录.exe
 update.exe
-*.json
 
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python

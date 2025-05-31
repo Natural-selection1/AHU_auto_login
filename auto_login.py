@@ -51,8 +51,8 @@ class funcDocker(object):
 
         return local_version != remote_version
 
-    # 从login_config.ini中读取并返回账号和密码
     def get_info(self) -> tuple:
+        """从login_config.ini中读取账号和密码"""
         config = configparser.ConfigParser()
         config.read("./login_config.ini")
         account = config.get("info", "account")
@@ -60,24 +60,23 @@ class funcDocker(object):
 
         return account, password
 
-    # 获取chromium浏览器的执行路径并返回
     def get_chromium_path(self) -> str:
+        """获取chromium浏览器的执行路径"""
         if getattr(sys, "frozen", False):
             chromium_path = os.path.join(sys._MEIPASS, "chrome-win/chrome.exe")
         else:
-            # !: 这里的路径可能需要根据自己电脑的实际情况进行修改(这里使用默认的是下载路径)
+            # ! 这里的路径可能需要根据自己电脑的实际情况进行修改(这里使用默认的是下载路径)
             chromium_path = rf"C:\Users\{os.getlogin()}\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe"
         return chromium_path
 
-    # 判断网络连接模式
     def select_network_mode(self) -> str:
+        """判断网络连接模式"""
         output = subprocess.check_output("ipconfig /all", shell=True)
-        # 将输出按照\r\n\r\n进行分割
         try:
             output = output.decode("utf-8").split("\r\n\r\n")
         except UnicodeDecodeError:
             output = output.decode("gbk").split("\r\n\r\n")
-        # 取第四段输出，即有线网卡的输出
+        # 寻找有线网卡的输出
         for offset, _ in enumerate(output):
             if "以太网" in _:
                 output_for_broadband = output[offset + 1]
@@ -89,9 +88,8 @@ class funcDocker(object):
             return "有线网"
         return self.is_ahu_portal_connected()
 
-    # 判断是否为已连接ahu.portal
     def is_ahu_portal_connected(self) -> str:
-        # 执行 netsh wlan show interfaces 并检查是否有连接到 ahu.portal
+        """判断是否为已连接ahu.portal"""
         output = subprocess.check_output(
             "netsh wlan show interfaces", shell=True, text=True
         )
@@ -99,8 +97,8 @@ class funcDocker(object):
             return "无线网"
         return self.link_to_ahu_portal()
 
-    # 连接至ahu.portal
     def link_to_ahu_portal(self) -> str:
+        """连接至ahu.portal"""
         try:
             subprocess.check_output(
                 'netsh wlan connect name="ahu.portal"', shell=True, text=True
@@ -112,10 +110,10 @@ class funcDocker(object):
                 timeout=5,
             )
             sys.exit()
-        return "无法连接至ahu.portal"
+        return "无线网"
 
-    # 初始化浏览器
     def init_browser(self):
+        """初始化浏览器"""
         self.playwright = sync_api.sync_playwright().start()
         self.browser = self.playwright.chromium.launch(
             headless=True,  # *: 若要调试，请将headless=False
@@ -123,15 +121,15 @@ class funcDocker(object):
         )
         self.page = self.browser.new_page()
 
-    # 关闭浏览器
     def close_browser(self):
+        """关闭浏览器"""
         if self.browser:
             self.browser.close()
             self.playwright.stop()
 
-    # 执行自动登录的主要逻辑
     # @time_it
     def run_auto_login(self) -> None:
+        """执行自动登录的主要逻辑"""
         if self.flag == "有线网":
             self.page.goto("http://172.16.253.3/")
             self.page.fill(
@@ -140,7 +138,6 @@ class funcDocker(object):
         if self.flag == "无线网":
             try:
                 self.page.goto("http://172.21.0.1/")
-
             except Exception as e:
                 if "net::ERR_CONNECTION_REFUSED" in str(e):
                     notification.notify(
@@ -162,13 +159,11 @@ class funcDocker(object):
         self.page.click('input[value="登录"]')
 
         self.close_browser()
-
         notification.notify(
             title="已完成登录操作",
             message="可以愉快地冲浪了",
             timeout=3,
         )
-
         if os.path.exists("update.exe") and self.diff_version():
             subprocess.Popen(
                 f"{os.path.join(os.path.dirname(os.path.abspath(sys.executable)), 'update.exe')}",
@@ -181,12 +176,11 @@ class funcDocker(object):
 def check_network():
     """检查网络连接的线程函数"""
     process = subprocess.Popen(
-        "ping 121.194.11.72",
+        "ping 121.194.11.72",  # ! 避免使用IPv6, 校园网的IPv6不需要验证就可以使用
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-
     while True:
         output = process.stdout.readline()
         if output:
@@ -206,39 +200,29 @@ def main():
     # 用于存储网络检查结果的变量
     network_check_result = [False, False]
 
-    # 定义线程目标函数
+    # 线程目标函数
     def thread_check_network():
-        # 创建两个线程分别检查网络
-        thread1 = threading.Thread(target=lambda: set_result(0))
-        thread2 = threading.Thread(target=lambda: set_result(1))
-
-        # 定义设置结果的函数
         def set_result(index):
             network_check_result[index] = check_network()
 
-        # 启动线程
+        thread1 = threading.Thread(target=set_result(0))
+        thread2 = threading.Thread(target=set_result(1))
         thread1.start()
         thread2.start()
-
-        # 等待两个线程完成
         thread1.join()
         thread2.join()
 
-    # 创建并启动线程
     network_thread = threading.Thread(target=thread_check_network)
     network_thread.daemon = True
     network_thread.start()
 
-    # 创建对象实例
-    func_docker = funcDocker()
-
     # 主线程同时初始化浏览器
+    func_docker = funcDocker()
     func_docker.init_browser()
 
     network_thread.join()
 
     if any(network_check_result):
-        # 如果网络已连接，关闭浏览器并退出
         func_docker.close_browser()
         notification.notify(
             title="已存在网络连接",
@@ -276,9 +260,9 @@ if __name__ == "__main__":
 #     return None
 
 
-# !: 无线网络似乎要优先访问 http://172.26.0.1/
-# !: 但无线网和有线网最后还是要跳转到 http://172.16.253.3/
-# *: 172.21.0.1 似乎是通用网关(ip在线时则不可访问(无论wifi还是有线))
+# ! 无线网络似乎要优先访问 http://172.26.0.1/
+# ! 但无线网和有线网最后还是要跳转到 http://172.16.253.3/
+# * 172.21.0.1 似乎是通用网关(ip在线时则不可访问(无论wifi还是有线))
 # if self.is_connected_via_wifi():
 #     url = rf"http://{str(self.get_default_gateway())}/"
 #     page.goto(url)

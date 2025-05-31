@@ -36,16 +36,15 @@ class UpdateExe:
             time.sleep(3)
             sys.exit()
 
-        # 写入数据
         with open("update/hashes.txt", "wb") as file:
             file.write(response.content)
         print("哈希值列表获取成功!")
 
         # 记录非空行数（即尸块数）并返回哈希值列表
         with open("update/hashes.txt", "r") as file:
-            lines = file.readlines()  # 先读取所有行
-            hash_list = [line.strip() for line in lines if line.strip()]  # 处理非空行
-            file_numbers = len(hash_list)  # 计算非空行数
+            lines = file.readlines()
+            hash_list = [line.strip() for line in lines if line.strip()]
+            file_numbers = len(hash_list)
 
         print(f"一共需要 {file_numbers} 个文件块.")
         return hash_list, file_numbers
@@ -98,21 +97,16 @@ class UpdateExe:
 
     def merge_exe_with_hash(self) -> None:
         """验证每个块的哈希值是否正确并合并分块文件."""
-        # 开始向 exe 中写入数据
         with open(f"update/{self.main_exe}", "wb") as output:
-            # 遍历所有文件块
             for i in range(self.file_numbers):
-                # 检验文件块是否存在
                 if os.path.exists(f"update/chunk_{i}.txt"):
                     with open(f"update/chunk_{i}.txt", "rb") as chunk_file:
                         chunk_data = chunk_file.read()
-                        # 对存在的文件块进行哈希值验证
                         if hashlib.sha256(chunk_data).hexdigest() != self.hash_list[i]:
                             print(f"文件块 {i} 损坏!")
                             self.need_download_files.add(i)
                             continue  # 跳过写入损坏的文件块
                         output.write(chunk_data)
-
                     # 文件块存在且完整，从 need_download_files 中删除
                     self.need_download_files.discard(i)
                 else:
